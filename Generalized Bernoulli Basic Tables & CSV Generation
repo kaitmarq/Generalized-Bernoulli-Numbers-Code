@@ -1,0 +1,62 @@
+# Straight sage math code, will print out the numbers directly:
+for p in [0..100]:
+    if p.is_prime():
+        G = DirichletGroup(p, QQ)
+        gens = G.gens()
+        if gens:  # Ensure there is at least one generator
+            e = gens[0]  # Get first generator
+            
+            if p % 4 == 1:  # If prime ≡ 1 (mod 4)
+                for n in [0..100]:
+                    if n % 2 == 0:  # Even indices
+                        print(f"B_{n}({e}) =", e.bernoulli(n))
+
+            elif p % 4 == 3:  # If prime ≡ 3 (mod 4)
+                for n in [0..100]:
+                    if n % 2 == 1:  # Odd indices
+                        print(f"B_{n}({e}) =", e.bernoulli(n))
+
+# Script to save numbers to a CSV file (and better formatted, specifies which index)
+import csv
+from sage.all import *
+
+def compute_generalized_bernoulli():
+    results = {}
+    
+    for p in range(1, 101): # all between 1 and 100
+        if is_prime(p):
+            G = DirichletGroup(p, QQ)
+            gens = G.gens()
+            
+            if gens:  # Ensure at least one generator exists
+                e = gens[0]  # Select first generator
+                bernoulli_values = []
+                
+                if p % 4 == 1:
+                    indices = range(0, 101, 2)  # Even indices
+                elif p % 4 == 3:
+                    indices = range(1, 101, 2)  # Odd indices
+                
+                for n in indices: # stores indices!
+                    bernoulli_values.append((n, e.bernoulli(n)))
+                
+                results[p] = bernoulli_values
+    
+    return results
+
+def save_to_csv(results, filename="bernoulli_results.csv"):
+    with open(filename, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(["Prime", "n", "B_n(e)"])
+        
+        for prime, values in results.items(): # creates prime column
+            for n, bn in values: # creates n column (indices)
+                writer.writerow([prime, n, bn]) # creates bernoulli numbers column
+
+def main():
+    results = compute_generalized_bernoulli()
+    save_to_csv(results)
+    print("Results saved to bernoulli_results.csv") # debugging yayyyy
+
+if __name__ == "__main__":
+    main()
