@@ -1,0 +1,64 @@
+# SPEARMANS
+from sage.all import *
+from scipy.stats import spearmanr
+
+# compute correlation
+def compute_spearman_correlation():
+    results = compute_generalized_bernoulli() # pull generalized bernoulli numbers
+    
+    # Get the first 50 regular Bernoulli numbers
+    num_values = 50
+    B_n = [bernoulli(n) for n in range(num_values)] 
+
+    # Get the first 50 generalized Bernoulli numbers for prime p=3
+    B_n_gen = results[3][:num_values]
+
+    # Ensure both lists are of the same length
+    min_length = min(len(B_n), len(B_n_gen))
+    B_n = B_n[:min_length]
+    B_n_gen = B_n_gen[:min_length]
+
+    # Compute the correlation coefficient
+    corr_result = spearmanr(B_n, B_n_gen)
+    corr_coeff = corr_result.statistic
+    p_value = corr_result.pvalue
+
+    # Print results
+    print(f"Spearman correlation coefficient: {corr_coeff}")
+    print(f"P-value: {p_value}")
+
+compute_spearman_correlation()
+
+# KENDALL TAU
+from sage.all import *
+from scipy.stats import kendalltau
+
+# Old code for computing a list of generalized bernoulli numbers based off primes
+def compute_generalized_bernoulli(): [see above]
+
+# compute correlation
+def compute_kendalltau_correlation():
+    results = compute_generalized_bernoulli() # pull generalized bernoulli numbers
+    
+    # Get the first 50 regular Bernoulli numbers
+    num_values = 50
+    B_n = [bernoulli(n) for n in range(num_values)] 
+
+    # Get the first 50 generalized Bernoulli numbers for prime p=3
+    B_n_gen = results[3][:num_values]
+
+    # Ensure both lists are of the same length
+    min_length = min(len(B_n), len(B_n_gen))
+    B_n = B_n[:min_length]
+    B_n_gen = B_n_gen[:min_length]
+
+   # Compute the correlation coefficient
+    corr_result = kendalltau(B_n, B_n_gen)
+    corr_coeff = corr_result.statistic
+    p_value = corr_result.pvalue
+
+    # Print results
+    print(f"Kendall Tau correlation coefficient: {corr_coeff}")
+    print(f"P-value: {p_value}")
+
+compute_kendalltau_correlation()
