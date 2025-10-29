@@ -1,0 +1,85 @@
+# Generate Table comparing correlation coefficients for pearson and chatterjee for first 100 primes & standard bernoullis
+from sage.all import *
+from scipy.stats import pearsonr
+from scipy.stats import chatterjeexi
+import csv
+
+# Old code for computing a list of generalized bernoulli numbers based off primes
+def compute_generalized_bernoulli():
+    results = {}
+    
+    for p in range(1, 101):  # Primes from 1 to 100
+        if is_prime(p):
+            G = DirichletGroup(p, QQ)
+            gens = G.gens()
+            
+            if gens:  # Ensure at least one generator exists
+                e = gens[0]  # Select first generator
+                bernoulli_values = []
+                
+                if p % 4 == 1:
+                    indices = range(0, 100, 2)  # Even indices
+                elif p % 4 == 3:
+                    indices = range(1, 101, 2)  # Odd indices
+                
+                for n in indices:
+                    bernoulli_values.append(float(e.bernoulli(n)))  # Convert to float as otherwise the correlation function breaks for any division results
+                
+                results[p] = bernoulli_values
+    
+    return results
+
+# Save results to CSV
+def save_to_csv(filename="airplane_corr_results_table.csv", num_terms=50):
+    num_values=50
+    B_n = [bernoulli(n) for n in range(num_values)]     # get standard Bernoulli numbers
+    results = compute_generalized_bernoulli() # pull generalized bernoulli numbers
+    
+    results["B_n"] = B_n # add standard bernoullis to results to make comprehensive list for comparison
+
+    with open(filename, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow([
+            "List A",
+            "List B",
+            "pearson_corr",
+            "pearson_p",
+            "xi_corr",
+            "xi_p",
+        ])
+    
+        results_keys=list(results.keys())
+
+        for i in range(len(results_keys)):
+            for j in range(len(results_keys)): 
+                # list A = results[at specific index – for specific prime], so B_n,p
+	            # list B = results[at specific index – for specific prime], so B_n,q
+                listA=results[results_keys[i]]
+                listB=results[results_keys[j]]
+
+	            # pearson results
+                pearson_corr, pearson_p=pearsonr(listA, listB)
+           
+	            # xi results
+                xi_corr_result=chatterjeexi(listA, listB)
+                xi_corr=xi_corr_result.statistic
+                xi_p=xi_corr_result.pvalue
+
+                labelA = f"B_n,{results_keys[i]}"
+                labelB = f"B_n,{results_keys[j]}"
+            
+	            # load into columns
+                writer.writerow([
+                    labelA,
+                    labelB,
+                    pearson_corr,
+                    pearson_p,
+                    xi_corr,
+                    xi_p,
+                ])
+
+        print(f"Results saved to {filename}")
+
+# create csv file
+if __name__ == "__main__":
+    save_to_csv()
